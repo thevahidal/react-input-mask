@@ -57,6 +57,12 @@ const App = () => {
           onChange={text => setValue(text)}
           mask={mask}
           placeholder={mask}
+          style={{marginBottom: 50}}
+        />
+        <h3 className='label'>Output</h3>
+        <input 
+          value={value}
+          disabled
         />
       </div>
     </div>
