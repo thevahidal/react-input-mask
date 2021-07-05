@@ -22,7 +22,7 @@ const Input = props => {
 
     let maskedValue = props.mask
     for (let index in unmaskedValue) {
-      maskedValue = maskedValue.replace('0', unmaskedValue[index])
+      maskedValue = maskedValue.replace('&', unmaskedValue[index])
     }
     const charIndex = maskedValue.lastIndexOf(unmaskedValue[unmaskedValue.length - 1])
     maskedValue = maskedValue.slice(0, charIndex + 1)
@@ -40,7 +40,7 @@ const Input = props => {
 
 const App = () => {
   const [value, setValue] = useState('')
-  const [mask, setMask] = useState('(+000) 000-0000-0000')
+  const [mask, setMask] = useState('(+&&&) &&&-&&&&-&&&&')
 
   return (
     <div className="App">
