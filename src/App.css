@@ -13,15 +13,23 @@
   height: 100vh;
 }
 
+.config {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+}
+
 input {
-  min-width: 30rem;
-  padding: 20px 30px;
+  padding: 15px 20px;
   font-size: 30px;
   border-radius: 15px;
   border: none;
+  width: 100%;
 }
 
 .label {
+  text-align: left;
   color: #fff;
   margin-bottom: 10px;
   width: 100%;
