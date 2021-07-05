@@ -43,7 +43,7 @@ const Input = props => {
 
 const App = () => {
   const [value, setValue] = useState('')
-  const [mask, setMask] = useState('(+$$$) $$$-$$$$-$$$$')
+  const [mask, setMask] = useState('+$ ($$$) $$$-$$$$')
   const [maskChar, setMaskChar] = useState('$')
 
   return (
@@ -62,6 +62,7 @@ const App = () => {
             <input
               value={maskChar}
               maxLength={1}
+              placeholder='&'
               onChange={e => setMaskChar(e.target.value)}
             />
           </div>
