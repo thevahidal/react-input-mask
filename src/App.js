@@ -62,7 +62,7 @@ const App = () => {
             <input
               value={maskChar}
               maxLength={1}
-              placeholder='&'
+              placeholder={'&'}
               onChange={e => setMaskChar(e.target.value)}
             />
           </div>
