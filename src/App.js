@@ -3,6 +3,8 @@ import { useState } from "react";
 import './App.css';
 
 const Input = props => {
+  const maskChar = props.maskChar || '&'
+
   const unmaskValue = (value) => {
     if (!value || !props.mask) return value
 
@@ -22,7 +24,7 @@ const Input = props => {
 
     let maskedValue = props.mask
     for (let index in unmaskedValue) {
-      maskedValue = maskedValue.replace('&', unmaskedValue[index])
+      maskedValue = maskedValue.replace(maskChar, unmaskedValue[index])
     }
     const charIndex = maskedValue.lastIndexOf(unmaskedValue[unmaskedValue.length - 1])
     maskedValue = maskedValue.slice(0, charIndex + 1)
@@ -32,6 +34,7 @@ const Input = props => {
   return (
     <input 
       {...props}
+      // type='number'
       value={maskValue(props.value)}
       onChange={e => props.onChange(unmaskValue(e.target.value))}
     />
@@ -40,7 +43,7 @@ const Input = props => {
 
 const App = () => {
   const [value, setValue] = useState('')
-  const [mask, setMask] = useState('(+&&&) &&&-&&&&-&&&&')
+  const [mask, setMask] = useState('(+$$$) $$$-$$$$-$$$$')
 
   return (
     <div className="App">
@@ -56,6 +59,7 @@ const App = () => {
           value={value}
           onChange={text => setValue(text)}
           mask={mask}
+          maskChar='$'
           placeholder={mask}
           style={{marginBottom: 50}}
         />
