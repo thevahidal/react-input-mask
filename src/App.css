@@ -20,7 +20,7 @@
   position: relative;
 }
 
-input {
+.input {
   padding: 15px 20px;
   font-size: 30px;
   border-radius: 15px;

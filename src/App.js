@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import Chat from './Chat'
 import './App.css';
 
 const Input = props => {
@@ -45,6 +46,8 @@ const App = () => {
   const [value, setValue] = useState('')
   const [mask, setMask] = useState('+$ ($$$) $$$-$$$$')
   const [maskChar, setMaskChar] = useState('$')
+
+  return <Chat />
 
   return (
     <div className="App">
