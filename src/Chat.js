@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dayjs from 'dayjs'
 import styled, { keyframes } from 'styled-components'
 
@@ -7,7 +7,7 @@ import useRecorder from "./useRecorder";
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
-var QUOTES = [
+const QUOTES = [
   "The quick brown fox jumps over the lazy dog.",
   "Look out! There are llamas!",
   "No, really, don't get up.",
@@ -17,25 +17,32 @@ var QUOTES = [
   "I am independent.",
   "I am bringing change.",
 ];
+const MAX_BAR_HEIGHT = 15
 
 const beating = keyframes`
   0% {
     transform: scale( .75 );
+    opacity: 0.75;
   }
   20% {
     transform: scale( 1.1 );
+    opacity: 1;
   }
   40% {
     transform: scale( .75 );
+    opacity: 0.75;
   }
   60% {
     transform: scale( 1.1 );
+    opacity: 1;
   }
   80% {
     transform: scale( .75 );
+    opacity: 0.75;
   }
   100% {
     transform: scale( .75 );
+    opacity: 0.75;
   }
 `;
 
@@ -43,19 +50,60 @@ const RecordingDot = styled.div`
   animation: ${beating} 5s infinite;
 `
 
+const SAudioBars = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 0 10px;
+`
+
+const SAudioBar = styled.div`
+  width: 3px;
+  height: ${p => 2 + p.height}px;
+  background: #aaa;
+  margin-right: 2px;
+  border-radius: 2px;
+`
+
+const AudioBars = props => {
+
+  return (
+    <SAudioBars>
+      {
+        props.bars.slice(Math.max(props.bars.length - 50, 1)).map((b, index) => (
+          <SAudioBar key={index} height={b} />
+        ))
+      }
+    </SAudioBars>
+  )
+}
+
 const Message = props => {
   const BORDER_RADIUS = 20
   let isMeStyle = {}
   let isMeWrapperStyle = {}
-  if (props.isMe) isMeStyle = {
-    background: 'powderblue',
-    borderBottomLeftRadius: BORDER_RADIUS,
-    borderBottomRightRadius: 0,
-    alignItems: 'flex-start',
+  if (props.isMe) {
+    isMeStyle = {
+      background: 'powderblue',
+      borderBottomLeftRadius: BORDER_RADIUS,
+      borderBottomRightRadius: 0,
+      alignItems: 'flex-start',
+    }
+    isMeWrapperStyle = {
+      alignSelf: 'flex-end',
+    }
   }
-  if (props.isMe) isMeWrapperStyle = {
-    alignSelf: 'flex-end',
-  }
+
+  // if (!props.isSingle && !props.isMe) {
+  //   isMeStyle = {
+  //     ...isMeStyle,
+  //     borderTopLeftRadius: 0,
+  //   }
+  // } else {
+  //   isMeStyle = {
+  //     ...isMeStyle,
+  //     borderTopRightRadius: 0,
+  //   }
+  // }
 
   return (<div style={{
     marginBottom: 10,
@@ -66,7 +114,7 @@ const Message = props => {
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: BORDER_RADIUS,
       padding: '15px 15px',
-      background: '#ccc',
+      background: '#eee',
       display: 'flex',
       alignItems: 'flex-end',
       flexDirection: 'column',
@@ -88,6 +136,7 @@ const Message = props => {
 }
 
 let timerInterval = null;
+let audioBarsInterval = null;
 let randomMessageInterval = null;
 
 const Chat = () => {
@@ -96,6 +145,19 @@ const Chat = () => {
   const [message, setMessage] = useState('')
   const [recordingStarted, setRecordingStarted] = useState(null)
   const [recordingTimer, setRecordingTimer] = useState('00:00')
+  const [audioBars, setAudioBars] = useState([])
+
+  const bottomOfMessages = useRef()
+
+  useEffect(() => {
+    let timestamp = new Date().toISOString()
+    if (audioURL) setChats([...chats, {
+      type: 'AUDIO',
+      data: audioURL,
+      isMe: true,
+      timestamp,
+    }])
+  }, [audioURL])
 
   useEffect(() => {
     if (recordingStarted) {
@@ -111,6 +173,18 @@ const Chat = () => {
       clearInterval(timerInterval);
     }
     return () => clearInterval(timerInterval);
+  }, [recordingStarted, recordingTimer]);
+
+  useEffect(() => {
+    if (recordingStarted) {
+      audioBarsInterval = setInterval(() => {
+        const audioBarHeight = Math.random() * MAX_BAR_HEIGHT
+        setAudioBars(audioBars => [...audioBars, audioBarHeight])
+      }, 300);
+    } else if (!recordingStarted) {
+      clearInterval(audioBarsInterval);
+    }
+    return () => clearInterval(audioBarsInterval);
   }, [recordingStarted, recordingTimer]);
 
   useEffect(() => {
@@ -147,16 +221,9 @@ const Chat = () => {
     let timestamp = new Date().toISOString()
     if (isRecording) {
       stopRecording()
-      setTimeout(() => {
-        setChats([...chats, {
-          type: 'AUDIO',
-          data: audioURL,
-          isMe: true,
-          timestamp,
-        }])
-      }, 500)
       setRecordingStarted(null)
       setRecordingTimer('00:00')
+      setAudioBars([])
     } else {
       setRecordingStarted(timestamp)
       startRecording()
@@ -178,10 +245,18 @@ const Chat = () => {
         backgroundSize: 'cover',
       }}>
         {
-          chats.map(c =>
-            <Message key={c.timestamp} {...c} />
-          )
+          chats.map((c, index) => {
+            let isSingleMessage = true
+
+            try {
+              if (chats[index - 1].isMe === c.isMe) isSingleMessage = false
+            } catch (error) { }
+
+            return <Message key={c.timestamp} {...c} isSingle={isSingleMessage} />
+          })
         }
+        <div style={{ float: "left", clear: "both" }}
+          ref={bottomOfMessages} />
       </div>
       <div style={{
         width: '100vw',
@@ -201,26 +276,37 @@ const Chat = () => {
             padding: '20px 35px',
           }}
         >
-          {!isRecording ? <input
-            autoFocus={true}
-            value={message}
-            onChange={handleChange}
-            placeholder='Type...'
-            style={{
-              background: '#fff',
-              border: 'none',
-              borderRadius: 20,
-              height: 30,
-              position: 'relative',
-              padding: '10px 30px',
-              fontSize: 20,
-              flex: 1,
-            }}
-          /> : <div>
-            Recording...
-            {' '}
-            {recordingTimer}
-          </div>}
+          {
+            !isRecording
+              ? <input
+                autoFocus={true}
+                value={message}
+                onChange={handleChange}
+                placeholder='Type...'
+                style={{
+                  background: '#fff',
+                  border: 'none',
+                  borderRadius: 20,
+                  height: 30,
+                  position: 'relative',
+                  padding: '10px 30px',
+                  fontSize: 20,
+                  flex: 1,
+                }}
+              />
+              : <div style={{
+                display: 'flex'
+              }}>
+                <div>
+                  Recording...
+                  {' '}
+                  {recordingTimer}
+                </div>
+                <AudioBars bars={audioBars} />
+                <div>
+                </div>
+              </div>
+          }
           <div
             onClick={handleRecord}
             style={{

@@ -33,8 +33,11 @@ const useRecorder = () => {
     setIsRecording(true);
   };
 
-  const stopRecording = () => {
+  const stopRecording = async () => {
     setIsRecording(false);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks()
+      .forEach(track => track.stop())
   };
 
   return [audioURL, isRecording, startRecording, stopRecording];
