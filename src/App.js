@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Chat from './Chat'
+import Counter from './Counter'
 import './App.css';
 
 const Input = props => {
@@ -47,6 +48,7 @@ const App = () => {
   const [mask, setMask] = useState('+$ ($$$) $$$-$$$$')
   const [maskChar, setMaskChar] = useState('$')
 
+  // return <Counter />
   return <Chat />
 
   return (

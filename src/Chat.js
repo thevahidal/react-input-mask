@@ -212,12 +212,13 @@ const Chat = () => {
       timestamp: new Date().toISOString(),
     }])
     setMessage('')
+    bottomOfMessages.current.scrollIntoView({ behavior: 'smooth', block: 'start', })
   }
 
   const handleFileChange = (e) => {
     const {files} = e.target
     const {length, ...rest} = files
-    
+
     for (let key in rest) {
       setChats(chats => [...chats, {
         type: 'FILE',
