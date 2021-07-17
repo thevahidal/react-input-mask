@@ -148,6 +148,7 @@ const Chat = () => {
   const [audioBars, setAudioBars] = useState([])
 
   const bottomOfMessages = useRef()
+  const fileInput = useRef()
 
   useEffect(() => {
     let timestamp = new Date().toISOString()
@@ -196,7 +197,7 @@ const Chat = () => {
         isMe: false,
         timestamp: new Date().toISOString(),
       }])
-    }, 3000);
+    }, 10000);
 
     return () => clearInterval(randomMessageInterval);
   }, []);
@@ -211,6 +212,20 @@ const Chat = () => {
       timestamp: new Date().toISOString(),
     }])
     setMessage('')
+  }
+
+  const handleFileChange = (e) => {
+    const {files} = e.target
+    const {length, ...rest} = files
+    
+    for (let key in rest) {
+      setChats(chats => [...chats, {
+        type: 'FILE',
+        data: files[key],
+        isMe: true,
+        timestamp: new Date().toISOString(),
+      }])
+    }
   }
 
   const handleChange = (e) => {
@@ -228,6 +243,20 @@ const Chat = () => {
       setRecordingStarted(timestamp)
       startRecording()
     }
+  }
+
+  const handleAddFile = () => {
+    fileInput.current.click()
+    // let timestamp = new Date().toISOString()
+    // if (isRecording) {
+    //   stopRecording()
+    //   setRecordingStarted(null)
+    //   setRecordingTimer('00:00')
+    //   setAudioBars([])
+    // } else {
+    //   setRecordingStarted(timestamp)
+    //   startRecording()
+    // }
   }
 
   return (
@@ -334,6 +363,46 @@ const Chat = () => {
               borderRadius: 20,
             }} />}
           </div>
+          <div
+            onClick={handleAddFile}
+            style={{
+              background: 'none',
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              background: '#aaa',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: 10,
+            }}
+          >
+            A
+            {/* {!isRecording 
+            ? 'A'
+            // <img
+            //   style={{
+            //     height: 20,
+            //   }}
+            //   src={'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Font_Awesome_5_solid_microphone.svg/412px-Font_Awesome_5_solid_microphone.svg.png'}
+            // /> 
+            : <RecordingDot style={{
+              width: 20,
+              height: 20,
+              background: 'red',
+              borderRadius: 20,
+            }} />} */}
+          </div>
+          <input 
+            ref={fileInput} 
+            multiple
+            type='file' 
+            onChange={handleFileChange}
+            style={{
+              display: 'none'
+            }}
+          />
           <input type='submit' style={{
             display: 'none'
           }}
