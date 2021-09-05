@@ -140,7 +140,7 @@ let audioBarsInterval = null;
 let randomMessageInterval = null;
 
 const Chat = () => {
-  const [audioURL, isRecording, startRecording, stopRecording] = useRecorder();
+  const [audioURL, isRecording, startRecording, stopRecording, recorderError, checkRequestRecorder] = useRecorder();
   const [chats, setChats] = useState([])
   const [message, setMessage] = useState('')
   const [recordingStarted, setRecordingStarted] = useState(null)
@@ -149,6 +149,10 @@ const Chat = () => {
 
   const bottomOfMessages = useRef()
   const fileInput = useRef()
+
+  useEffect(() => {
+    checkRequestRecorder()
+  }, [])
 
   useEffect(() => {
     let timestamp = new Date().toISOString()
@@ -235,6 +239,10 @@ const Chat = () => {
 
   const handleRecord = () => {
     let timestamp = new Date().toISOString()
+    if (recorderError) {
+      alert(recorderError)
+      return
+    }
     if (isRecording) {
       stopRecording()
       setRecordingStarted(null)
