@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 const useRecorder = () => {
   const [audioURL, setAudioURL] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState(null);
   const [recorderError, setRecorderError] = useState(null);
@@ -12,6 +13,7 @@ const useRecorder = () => {
       if (isRecording) {
         requestRecorder()
           .then((rec) => {
+            setRecorderError(null)
             setRecorder(rec)
           })
           .catch(err => {
@@ -31,6 +33,7 @@ const useRecorder = () => {
     // Obtain the audio when ready.
     const handleData = e => {
       setAudioURL(URL.createObjectURL(e.data));
+      setAudioFile(e.data)
     };
     recorder.addEventListener("dataavailable", handleData);
     return () => recorder.removeEventListener("dataavailable", handleData);
@@ -47,20 +50,30 @@ const useRecorder = () => {
       .forEach(track => track.stop())
   };
 
-  const checkRequestRecorder = () => {
-    requestRecorder()
-      .then()
+  const checkRequestRecorder = async () => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(res => {
+        setRecorderError(null)
+      })
       .catch(err => {
         setRecorderError(err)
-      });
+      })
   }
 
-  return [audioURL, isRecording, startRecording, stopRecording, recorderError, checkRequestRecorder];
+  return {
+    audioURL, 
+    audioFile,
+    isRecording, 
+    startRecording, 
+    stopRecording, 
+    recorderError, 
+    checkRequestRecorder
+  };
 };
 
 async function requestRecorder() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  return new MediaRecorder(stream);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    return new MediaRecorder(stream);
 }
 
 export default useRecorder;
